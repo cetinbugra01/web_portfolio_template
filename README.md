@@ -1,4 +1,5 @@
 # 📷 Dış-Mekan-Çekimi
+2026
 
 > Dış mekan portre ve otomobil çekimleri için **lokasyon bazlı ışık planlama platformu.**
 
