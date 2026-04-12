@@ -247,3 +247,11 @@ img {
   max-width: 100%; /* Asla kapsayıcısından geniş olma */
   height: auto;    /* Oranı koru, uzama */
 }
+/* Hamburger başta gizli */
+.hamburger { display: none; }
+
+@media (max-width: 900px) {
+  .hamburger { display: flex; } /* Mobilde göster */
+  .nav-links { display: none; } /* Menüyü gizle */
+  .nav-links.open { display: flex; } /* JS açınca göster */
+}
