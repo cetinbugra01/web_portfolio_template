@@ -3,38 +3,132 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dis-Mekan-Cekimi | Lokasyon Işık Planlama</title>
+  <title>Dış-Mekan-Çekimi | Lokasyon Işık Planlama</title>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+  <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-    :root {
-      --black:   #0a0a0a;
-      --dark:    #111111;
-      --mid:     #1c1c1c;
-      --border:  #2a2a2a;
-      --muted:   #555;
-      --text:    #c8c0b4;
-      --light:   #e8e0d4;
-      --gold:    #d4a843;
-      --gold2:   #f0c060;
-      --accent:  #e87b3a;
-    }
+  <nav>
+    <a href="index.html" class="nav-logo">DIS·MEKAN<span>·CEKİMİ</span></a>
+    
+    <div class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
 
-    html { scroll-behavior: smooth; overflow-x: hidden; }
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#features">Özellikler</a></li>
+      <li><a href="#nasil">Nasıl Çalışır</a></li>
+      <li><a href="#harita">Harita</a></li>
+      <li><a href="project.html">Proje</a></li>
+      <li><a href="about.html">Hakkında</a></li>
+      <li><a href="contact.html">İletişim</a></li>
+    </ul>
+  </nav>
 
-    body {
-      background: var(--black);
-      color: var(--text);
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 18px;
-      line-height: 1.7;
-      overflow-x: hidden;
-      cursor: none;
-    }
+  <section class="hero">
+    <div class="hero-left">
+      <div class="hero-tag">Lokasyon Işık Planlama Aracı</div>
+      <h1 class="hero-title">
+        Doğru Işığı,<br>
+        Doğru <em>Anda</em><br>
+        Yakala
+      </h1>
+      <p class="hero-sub">
+        135mm F2 ile çekim için<br>
+        altın saat hesaplama &amp;<br>
+        lokasyon planlama platformu.
+      </p>
+      <div class="hero-cta">
+        <a href="#harita" class="btn-primary">Haritayı Aç</a>
+        <a href="#nasil" class="btn-secondary">Nasıl Çalışır</a>
+      </div>
+    </div>
 
-    /* Görsellerin taşmasını engelleyen global kural */
+    <div class="hero-right">
+      <div class="hero-visual"></div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-num">f/2</span>
+          <span class="stat-label">Maksimum Açıklık</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num">±3°</span>
+          <span class="stat-label">Işık Toleransı</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num">47'</span>
+          <span class="stat-label">Altın Saat Süresi</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <div class="features-header">
+      <div class="section-label">Özellikler</div>
+      <h2 class="features-title">
+        Her Çekim İçin<br>
+        <em>Akıllı Planlama</em>
+      </h2>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">📍</span>
+        <h3 class="feature-name">Harita &amp; Etiketleme</h3>
+        <p class="feature-desc">Çekim noktalarını harita üzerinde işaretle. "Otomobil Çekimi", "Altın Saat" gibi özel etiketler ekle.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">🌅</span>
+        <h3 class="feature-name">Işık Hesaplama</h3>
+        <p class="feature-desc">Seçilen konuma özel gün doğumu, gün batımı ve Altın Saat zamanlarını otomatik hesapla.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">📷</span>
+        <h3 class="feature-name">Keşif Notları</h3>
+        <p class="feature-desc">Mekanlara lens tavsiyeleri, kompozisyon notları ve referans fotoğrafları kaydet.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="map-section" id="harita">
+    <div class="section-label">Harita</div>
+    <h2 style="font-size: 36px; color: var(--light); font-weight: 300;">Çekim Mekanlarını İşaretle</h2>
+    <p style="color: var(--muted); font-family: monospace; font-size: 12px; margin-bottom: 20px;">
+      Not: Haritanın açılması için main.js içinden Mapbox anahtarını girmeniz gereklidir.
+    </p>
+
+    <div style="width: 100%; height: 500px; border: 1px solid var(--border);" id="map"></div>
+  </section>
+
+  <footer>
+    <div>
+      <div style="font-size: 28px; color: var(--light); font-style: italic;">Dış Mekan Çekimi</div>
+      <div style="font-family: monospace; font-size: 10px; color: #555;">Lokasyon bazlı ışık planlama platformu</div>
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html">Ana Sayfa</a></li>
+      <li><a href="about.html">Hakkında</a></li>
+      <li><a href="contact.html">İletişim</a></li>
+    </ul>
+  </footer>
+
+  <script src="main.js"></script>
+
+</body>
+</html>    /* Görsellerin taşmasını engelleyen global kural */
     img, video, canvas, svg { 
       max-width: 100%; 
       height: auto; 
