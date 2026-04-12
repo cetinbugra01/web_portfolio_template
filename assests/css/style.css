@@ -232,3 +232,14 @@ footer { padding: 64px; border-top: 1px solid var(--border); display: flex; just
   .cursor, .cursor-ring, nav { display: none; }
   body { background: white; color: black; cursor: auto; }
 }
+/* Masaüstü stili — herkese uygulanır */
+.hero {
+  grid-template-columns: 1fr 1fr; /* 2 sütun */
+}
+
+/* 900px'den küçük ekranlarda — yani telefon/tablet */
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr; /* 1 sütun */
+  }
+}
