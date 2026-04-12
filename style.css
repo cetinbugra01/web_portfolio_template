@@ -242,3 +242,7 @@ footer { padding: 64px; border-top: 1px solid var(--border); display: flex; just
     grid-template-columns: 1fr; /* 1 sütun */
   }
 }
+img {
+  max-width: 100%; /* Asla kapsayıcısından geniş olma */
+  height: auto;    /* Oranı koru, uzama */
+}
