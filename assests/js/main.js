@@ -4,7 +4,7 @@
    ============================================ */
 
 /* ── API KEYS (buraya kendi keylerini gir) ── */
-const MAPBOX_TOKEN   = 'YOUR_MAPBOX_TOKEN_HERE';
+const MAPBOX_TOKEN   = 'pk.eyJ1IjoiY2V0aW5idWdyYWEiLCJhIjoiY21uNXRqcnN2MGQ5YzJ0c2NqdW0zaG04ZSJ9.pkCUVwUhkrfNH-zcP1BvDA';
 const WEATHER_API_KEY = 'YOUR_OPENWEATHERMAP_KEY_HERE';
 
 /* ============================================
@@ -177,7 +177,7 @@ function initMap() {
   const mapContainer = document.getElementById('map');
   if (!mapContainer) return;
 
-  if (MAPBOX_TOKEN === 'YOUR_MAPBOX_TOKEN_HERE') {
+  if (MAPBOX_TOKEN === 'pk.eyJ1IjoiY2V0aW5idWdyYWEiLCJhIjoiY21uNXRqcnN2MGQ5YzJ0c2NqdW0zaG04ZSJ9.pkCUVwUhkrfNH-zcP1BvDA') {
     mapContainer.innerHTML = `
       <div style="height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;font-family:'Space Mono',monospace;font-size:11px;color:#555;background:#111;border:1px solid #2a2a2a;">
         <span style="font-size:40px">🗺</span>
