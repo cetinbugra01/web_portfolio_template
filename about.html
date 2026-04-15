@@ -2,6 +2,15 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+  <script>
+    // Tema: sayfa yüklenir yüklenmez uygula (flash önleme)
+    (function() {
+      if (localStorage.getItem('theme') === 'light') {
+        document.documentElement.classList.add('light-mode');
+        document.body && document.body.classList.add('light-mode');
+      }
+    })();
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Hakkında | Dış-Mekan-Çekimi</title>
@@ -25,7 +34,7 @@
 
     html { scroll-behavior: smooth; }
     /* ── LIGHT MODE ── */
-    body.light-mode {
+    html.light-mode body, body.light-mode {
       --black:   #f5f0e8;
       --dark:    #ede8dc;
       --mid:     #e0d8cc;
@@ -466,9 +475,26 @@
     .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
 
+
+    /* ── HAMBURGER ── */
+    .hamburger { display: none; flex-direction: column; gap: 6px; cursor: pointer; z-index: 102; background: none; border: none; padding: 4px; }
+    .hamburger span { display: block; width: 28px; height: 1px; background: var(--gold); transition: all 0.3s ease-in-out; }
+    @media (max-width: 900px) {
+      .hamburger { display: flex; }
+      .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+      .hamburger.open span:nth-child(2) { opacity: 0; }
+      .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+      .nav-links {
+        position: fixed; top: 0; right: -100%; width: 100%; height: 100vh;
+        flex-direction: column; justify-content: center; align-items: center;
+        gap: 40px; transition: right 0.4s ease; margin: 0; padding: 0;
+        display: flex !important;
+      }
+      .nav-links.open { right: 0; }
+      .nav-links a { font-size: 14px; }
+    }
     @media (max-width: 900px) {
       nav { padding: 20px 24px; }
-      .nav-links { display: none; }
       .page-header { padding: 120px 24px 60px; }
       .intro { grid-template-columns: 1fr; padding: 60px 24px; gap: 48px; }
       .problem { padding: 60px 24px; }
@@ -490,7 +516,7 @@
   <!-- NAV -->
   <nav>
     <a href="index.html" class="nav-logo">DIS·MEKAN<span>·CEKİMİ</span></a>
-    <ul class="nav-links">
+    <ul class="nav-links" id="navLinks">
       <li><a href="index.html#features">Özellikler</a></li>
       <li><a href="index.html#nasil">Nasıl Çalışır</a></li>
       <li><a href="index.html#harita">Harita</a></li>
@@ -498,6 +524,7 @@
       <li><a href="about.html" class="active">Hakkında</a></li>
       <li><a href="contact.html">İletişim</a></li>
     </ul>
+    <div style="display:flex;align-items:center;gap:16px;">
       <button class="theme-toggle" id="themeToggle" title="Tema değiştir" aria-label="Tema değiştir">
         <span class="theme-toggle-icon">🌙</span>
         <div class="theme-toggle-track">
@@ -505,7 +532,11 @@
         </div>
         <span class="theme-toggle-icon">☀️</span>
       </button>
-    </nav>
+      <button class="hamburger" id="hamburger" aria-label="Menü">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
 
   <!-- PAGE HEADER -->
   <div class="page-header">
@@ -744,21 +775,32 @@
   <button class="scroll-top-btn" id="scrollTopBtn" title="Yukarı çık" aria-label="Yukarı çık">↑</button>
 
   <script>
-    /* ── DARK / LIGHT MODE ── */
-    (function() {
-      if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
-    })();
-
     document.addEventListener('DOMContentLoaded', function() {
-      // Theme toggle
-      var btn = document.getElementById('themeToggle');
-      if (btn) {
-        btn.addEventListener('click', function() {
+      // Tema toggle
+      var themeBtn = document.getElementById('themeToggle');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', function() {
           document.body.classList.toggle('light-mode');
+          document.documentElement.classList.toggle('light-mode');
           localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
         });
       }
-      // Scroll top
+      // Hamburger menü
+      var ham = document.getElementById('hamburger');
+      var navL = document.getElementById('navLinks');
+      if (ham && navL) {
+        ham.addEventListener('click', function() {
+          ham.classList.toggle('open');
+          navL.classList.toggle('open');
+        });
+        navL.querySelectorAll('a').forEach(function(a) {
+          a.addEventListener('click', function() {
+            ham.classList.remove('open');
+            navL.classList.remove('open');
+          });
+        });
+      }
+      // Yukarı çık
       var topBtn = document.getElementById('scrollTopBtn');
       if (topBtn) {
         window.addEventListener('scroll', function() {
@@ -766,6 +808,13 @@
         });
         topBtn.addEventListener('click', function() {
           window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+      // Nav scroll efekti
+      var nav = document.querySelector('nav');
+      if (nav) {
+        window.addEventListener('scroll', function() {
+          nav.classList.toggle('scrolled', window.scrollY > 60);
         });
       }
     });
