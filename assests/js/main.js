@@ -1,546 +1,384 @@
-
 /* ============================================
-   DIS-MEKAN-CEKİMİ — main.js
+   DIS-MEKAN-CEKİMİ — Global Stylesheet
    ============================================ */
 
-/* ── API KEYS (buraya kendi keylerini gir) ── */
-const MAPBOX_TOKEN   = 'pk.eyJ1IjoiY2V0aW5idWdyYWEiLCJhIjoiY21uNXRqcnN2MGQ5YzJ0c2NqdW0zaG04ZSJ9.pkCUVwUhkrfNH-zcP1BvDA';
-const WEATHER_API_KEY = 'YOUR_OPENWEATHERMAP_KEY_HERE';
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Mono:wght@400;700&display=swap');
 
-/* ============================================
-   1. CUSTOM CURSOR
-   ============================================ */
-function initCursor() {
-  const cursor = document.getElementById('cursor');
-  const ring   = document.getElementById('cursorRing');
-  if (!cursor || !ring) return;
+:root {
+  --black:   #0a0a0a;
+  --dark:    #111111;
+  --mid:     #1c1c1c;
+  --border:  #2a2a2a;
+  --muted:   #555555;
+  --text:    #c8c0b4;
+  --light:   #e8e0d4;
+  --gold:    #d4a843;
+  --gold2:   #f0c060;
+  --accent:  #e87b3a;
+  --transition: 0.3s ease;
+  --font-display: 'Cormorant Garamond', serif;
+  --font-mono: 'Space Mono', monospace;
+  --shadow-gold: 0 4px 24px rgba(212,168,67,0.15);
+  --shadow-dark: 0 4px 24px rgba(0,0,0,0.4);
+}
 
-  let mouseX = 0, mouseY = 0;
-  let ringX  = 0, ringY  = 0;
+/* ── LIGHT MODE ── */
+body.light-mode {
+  --black:   #f5f0e8;
+  --dark:    #ede8dc;
+  --mid:     #e0d8cc;
+  --border:  #c8bfb0;
+  --muted:   #8a7f70;
+  --text:    #3a3028;
+  --light:   #1a1208;
+  --gold:    #b8861e;
+  --gold2:   #d4a030;
+  --accent:  #c05a18;
+}
 
-  document.addEventListener('mousemove', e => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-    cursor.style.left = mouseX + 'px';
-    cursor.style.top  = mouseY + 'px';
-  });
+body.light-mode nav {
+  background: linear-gradient(to bottom, rgba(245,240,232,0.97), transparent);
+}
+body.light-mode nav.scrolled {
+  background: rgba(245,240,232,0.99);
+}
+body.light-mode .nav-links {
+  background: rgba(245,240,232,0.98) !important;
+}
 
-  // Ring follows with lag
-  function animateRing() {
-    ringX += (mouseX - ringX) * 0.12;
-    ringY += (mouseY - ringY) * 0.12;
-    ring.style.left = ringX + 'px';
-    ring.style.top  = ringY + 'px';
-    requestAnimationFrame(animateRing);
+/* ── THEME TOGGLE ── */
+.theme-toggle {
+  display: flex; align-items: center; gap: 10px;
+  z-index: 102; cursor: pointer;
+  background: none; border: none; padding: 0;
+}
+.theme-toggle-track {
+  width: 44px; height: 24px;
+  background: var(--border); border-radius: 12px;
+  position: relative; transition: background 0.3s;
+  border: 1px solid var(--muted);
+}
+body.light-mode .theme-toggle-track { background: var(--gold); border-color: var(--gold); }
+.theme-toggle-thumb {
+  position: absolute; top: 3px; left: 3px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--gold); transition: transform 0.3s, background 0.3s;
+}
+body.light-mode .theme-toggle-thumb { transform: translateX(20px); background: var(--black); }
+.theme-toggle-icon { font-size: 14px; line-height: 1; }
+
+/* ── SCROLL TOP ── */
+.scroll-top-btn {
+  position: fixed; bottom: 40px; right: 40px; z-index: 200;
+  width: 48px; height: 48px;
+  background: var(--gold); color: var(--black);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s ease, background 0.3s;
+  pointer-events: none;
+}
+.scroll-top-btn.visible { opacity: 1; transform: translateY(0); pointer-events: all; }
+.scroll-top-btn:hover { background: var(--gold2); }
+
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
+
+body {
+  background: var(--black);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 18px;
+  line-height: 1.7;
+  overflow-x: hidden;
+  cursor: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+img, video, canvas, svg { max-width: 100%; height: auto; display: block; }
+a { color: inherit; text-decoration: none; transition: color var(--transition); }
+a:hover { color: var(--gold); }
+ul, ol { list-style: none; }
+button { font-family: var(--font-mono); border: none; background: none; cursor: none; }
+input, textarea, select { font-family: var(--font-display); font-size: 18px; color: var(--light); background: transparent; border: none; outline: none; }
+
+::selection { background: rgba(212,168,67,0.25); color: var(--light); }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--black); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+/* ── CURSOR ── */
+.cursor {
+  width: 8px; height: 8px;
+  background: var(--gold); border-radius: 50%;
+  position: fixed; top: 0; left: 0;
+  pointer-events: none; z-index: 9999;
+  transform: translate(-50%,-50%);
+}
+.cursor-ring {
+  width: 36px; height: 36px;
+  border: 1px solid rgba(212,168,67,0.4); border-radius: 50%;
+  position: fixed; top: 0; left: 0;
+  pointer-events: none; z-index: 9998;
+  transform: translate(-50%,-50%);
+  transition: all 0.15s ease;
+}
+.cursor-ring.hovered { width: 56px; height: 56px; border-color: rgba(212,168,67,0.7); }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 24px 48px;
+  background: linear-gradient(to bottom, rgba(10,10,10,0.95), transparent);
+  backdrop-filter: blur(4px);
+  transition: background var(--transition), border-bottom var(--transition);
+}
+nav.scrolled { border-bottom: 1px solid var(--border); background: rgba(10,10,10,0.98); }
+
+.nav-logo { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.25em; color: var(--gold); text-transform: uppercase; z-index: 102; }
+.nav-logo span { color: var(--muted); }
+
+.nav-links { display: flex; gap: 36px; }
+.nav-links a {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--muted);
+  position: relative; padding-bottom: 4px;
+}
+.nav-links a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 1px; background: var(--gold); transition: width var(--transition); }
+.nav-links a:hover, .nav-links a.active { color: var(--gold); }
+.nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+
+/* Hamburger */
+.hamburger {
+  display: none; flex-direction: column; gap: 6px;
+  cursor: pointer; z-index: 102;
+}
+.hamburger span {
+  display: block; width: 28px; height: 1px;
+  background-color: var(--gold); transition: all 0.3s ease-in-out;
+}
+
+/* ── SECTION LABEL ── */
+.section-label {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.35em;
+  text-transform: uppercase; color: var(--gold);
+  display: flex; align-items: center; gap: 16px; margin-bottom: 48px;
+}
+.section-label::after { content: ''; display: block; flex: 1; height: 1px; background: var(--border); max-width: 200px; }
+
+/* ── BUTTONS ── */
+.btn-primary {
+  background: var(--gold); color: var(--black);
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  padding: 16px 32px; border: none; cursor: none; display: inline-block;
+  transition: all var(--transition);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+}
+.btn-primary:hover { background: var(--gold2); color: var(--black); transform: translateY(-2px); box-shadow: var(--shadow-gold); }
+
+.btn-secondary {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--muted);
+  display: inline-flex; align-items: center; gap: 10px; transition: color var(--transition);
+}
+.btn-secondary:hover { color: var(--light); }
+.btn-secondary::after { content: '→'; font-size: 14px; transition: transform var(--transition); }
+.btn-secondary:hover::after { transform: translateX(4px); }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  position: relative;
+  overflow: hidden;
+}
+.hero-left {
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 140px 64px 80px;
+  position: relative; z-index: 2;
+}
+.hero-tag {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.3em;
+  text-transform: uppercase; color: var(--gold);
+  margin-bottom: 32px; display: flex; align-items: center; gap: 16px;
+}
+.hero-tag::before { content: ''; display: block; width: 40px; height: 1px; background: var(--gold); }
+.hero-title { font-size: clamp(52px, 6vw, 90px); font-weight: 300; line-height: 1.05; color: var(--light); letter-spacing: -0.02em; }
+.hero-title em { font-style: italic; color: var(--gold); }
+.hero-sub { margin-top: 24px; font-size: 15px; color: var(--muted); font-family: var(--font-mono); letter-spacing: 0.05em; max-width: 360px; line-height: 1.8; }
+.hero-cta { margin-top: 48px; display: flex; gap: 20px; align-items: center; }
+
+.hero-right { position: relative; overflow: hidden; }
+.hero-visual {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 60% 40%, rgba(212,168,67,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 80%, rgba(232,123,58,0.08) 0%, transparent 50%),
+    linear-gradient(135deg, #1a1208 0%, #0a0a0a 100%);
+}
+.aperture { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; height: 320px; }
+.aperture svg { width: 100%; height: 100%; animation: rotateSlow 20s linear infinite; }
+@keyframes rotateSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.aperture-inner {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px; height: 120px;
+  border: 1px solid rgba(212,168,67,0.3); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.aperture-inner::after { content: '135mm'; font-family: var(--font-mono); font-size: 9px; color: var(--gold); letter-spacing: 0.15em; }
+.hero-stats { position: absolute; bottom: 48px; right: 48px; display: flex; flex-direction: column; gap: 24px; text-align: right; }
+.stat-num { font-size: 36px; font-weight: 300; color: var(--light); display: block; font-style: italic; }
+.stat-label { font-family: var(--font-mono); font-size: 9px; color: var(--muted); letter-spacing: 0.2em; text-transform: uppercase; }
+.hero-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(to right, transparent, var(--gold), transparent); opacity: 0.4; }
+
+/* ── FEATURES ── */
+.features { padding: 120px 64px; background: var(--dark); }
+.features-header { max-width: 600px; margin-bottom: 80px; }
+.features-title { font-size: clamp(36px, 4vw, 56px); font-weight: 300; color: var(--light); line-height: 1.15; }
+.features-title em { font-style: italic; color: var(--gold); }
+.features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+
+.feature-card {
+  background: var(--mid); padding: 48px 40px;
+  position: relative; overflow: hidden;
+  transition: background 0.4s; border-top: 1px solid var(--border);
+}
+.feature-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(to right, var(--gold), var(--accent));
+  transform: scaleX(0); transition: transform 0.4s; transform-origin: left;
+}
+.feature-card:hover::before { transform: scaleX(1); }
+.feature-card:hover { background: #1f1f1f; }
+.feature-num { font-family: var(--font-mono); font-size: 9px; color: var(--gold); letter-spacing: 0.2em; margin-bottom: 32px; }
+.feature-icon { font-size: 40px; margin-bottom: 24px; display: block; filter: grayscale(0.3); }
+.feature-name { font-size: 22px; font-weight: 400; color: var(--light); margin-bottom: 16px; letter-spacing: -0.01em; }
+.feature-desc { font-size: 15px; color: var(--muted); font-family: var(--font-mono); line-height: 1.8; }
+.feature-tag { display: inline-block; margin-top: 24px; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); border: 1px solid rgba(212,168,67,0.3); padding: 6px 12px; }
+
+/* ── HOW IT WORKS ── */
+.how {
+  padding: 120px 64px; background: var(--black);
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+}
+.how-steps { display: flex; flex-direction: column; gap: 0; }
+.how-step {
+  display: grid; grid-template-columns: 80px 1fr; gap: 24px;
+  padding: 36px 0; border-bottom: 1px solid var(--border);
+  transition: all 0.3s;
+}
+.how-step:hover .step-num { color: var(--gold); }
+.step-num { font-size: 64px; font-weight: 300; color: var(--border); line-height: 1; font-style: italic; transition: color 0.3s; }
+.step-title { font-size: 22px; color: var(--light); margin-bottom: 8px; font-weight: 400; }
+.step-desc { font-size: 14px; color: var(--muted); font-family: var(--font-mono); line-height: 1.8; }
+
+.how-visual {
+  position: relative; background: var(--mid); border: 1px solid var(--border);
+  padding: 48px; min-height: 500px;
+  display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;
+}
+.how-visual::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 30% 30%, rgba(212,168,67,0.08) 0%, transparent 60%); }
+.sun-timeline { position: relative; z-index: 1; }
+.sun-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-bottom: 24px; }
+.sun-arc { position: relative; height: 120px; margin-bottom: 16px; }
+.sun-arc svg { width: 100%; height: 100%; }
+.sun-times { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+.sun-times .gold-hour { color: var(--gold); }
+
+.location-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 24px; margin-top: 32px; position: relative; z-index: 1; }
+.location-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+.location-name { font-size: 20px; color: var(--light); font-weight: 400; }
+.location-lens { font-family: var(--font-mono); font-size: 9px; color: var(--gold); border: 1px solid rgba(212,168,67,0.3); padding: 4px 10px; }
+.location-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.meta-key { font-family: var(--font-mono); font-size: 8px; color: var(--muted); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 4px; }
+.meta-val { font-size: 16px; color: var(--light); }
+
+/* ── MAP SECTION ── */
+.map-section { padding: 120px 64px; background: var(--dark); }
+.map-container { margin-top: 48px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+
+/* ── TECH BAR ── */
+.tech {
+  padding: 80px 64px; background: var(--black);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 80px; flex-wrap: wrap;
+}
+.tech-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.25em; color: var(--muted); text-transform: uppercase; white-space: nowrap; }
+.tech-items { display: flex; gap: 48px; flex-wrap: wrap; align-items: center; }
+.tech-item { font-family: var(--font-mono); font-size: 12px; color: var(--muted); letter-spacing: 0.1em; display: flex; align-items: center; gap: 10px; transition: color 0.3s; }
+.tech-item:hover { color: var(--light); }
+.tech-item .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+
+/* ── FOOTER ── */
+footer { padding: 64px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 32px; background: var(--black); }
+.footer-logo { font-size: 28px; font-weight: 300; color: var(--light); font-style: italic; }
+.footer-links { display: flex; gap: 32px; }
+.footer-links a { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); transition: color var(--transition); }
+.footer-links a:hover { color: var(--gold); }
+.footer-copy { font-family: var(--font-mono); font-size: 9px; color: var(--muted); letter-spacing: 0.1em; }
+
+/* ── FORM ── */
+.form-group { position: relative; border: 1px solid var(--border); background: var(--mid); transition: background var(--transition), border-color var(--transition); }
+.form-group:focus-within { background: #1f1f1f; border-color: var(--gold); z-index: 1; }
+.form-group label { display: block; font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); padding: 20px 24px 0; transition: color var(--transition); }
+.form-group:focus-within label { color: var(--gold); }
+.form-group input, .form-group select, .form-group textarea { width: 100%; background: transparent; border: none; outline: none; padding: 8px 24px 20px; font-family: var(--font-display); font-size: 18px; color: var(--light); resize: none; cursor: none; }
+
+/* ── ALERTS ── */
+.alert { padding: 20px 24px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.05em; line-height: 1.8; border: 1px solid; }
+.alert-success { background: rgba(212,168,67,0.08); border-color: rgba(212,168,67,0.3); color: var(--gold); }
+.alert-error   { background: rgba(192,64,64,0.08);  border-color: rgba(192,64,64,0.3);  color: #c04040; }
+
+/* ── SCROLL REVEAL ── */
+.reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-left { opacity: 0; transform: translateX(-30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal-left.visible { opacity: 1; transform: translateX(0); }
+.reveal-right { opacity: 0; transform: translateX(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal-right.visible { opacity: 1; transform: translateX(0); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  nav { padding: 20px 24px; }
+
+  .hamburger { display: flex; }
+  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .nav-links {
+    position: fixed; top: 0; right: -100%; width: 100%; height: 100vh;
+    background: rgba(10,10,10,0.98); backdrop-filter: blur(10px);
+    flex-direction: column; justify-content: center; align-items: center;
+    gap: 40px; transition: right 0.4s ease; display: flex; margin: 0; padding: 0;
   }
-  animateRing();
+  .nav-links.open { right: 0; }
+  .nav-links a { font-size: 14px; }
 
-  // Hover effect on interactive elements
-  const hoverTargets = document.querySelectorAll('a, button, .card, .feature-card, .lens-card, .faq-item, .social-link, .pin');
-  hoverTargets.forEach(el => {
-    el.addEventListener('mouseenter', () => ring.classList.add('hovered'));
-    el.addEventListener('mouseleave', () => ring.classList.remove('hovered'));
-  });
+  .hero { grid-template-columns: 1fr; }
+  .hero-right { display: none; }
+  .hero-left { padding: 100px 24px 60px; }
+  .features { padding: 80px 24px; }
+  .features-grid { grid-template-columns: 1fr; }
+  .how { grid-template-columns: 1fr; padding: 80px 24px; }
+  .map-section { padding: 80px 24px; }
+  .tech { padding: 60px 24px; gap: 32px; }
+  footer { padding: 40px 24px; flex-direction: column; align-items: flex-start; }
 }
 
-/* ============================================
-   2. NAVIGATION
-   ============================================ */
-function initNav() {
-  const nav = document.querySelector('nav');
-  if (!nav) return;
-
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 60) {
-      nav.classList.add('scrolled');
-    } else {
-      nav.classList.remove('scrolled');
-    }
-  });
+@media (max-width: 480px) {
+  body { font-size: 16px; }
+  .btn-primary { padding: 14px 24px; }
 }
 
-/* ============================================
-   3. SCROLL REVEAL
-   ============================================ */
-function initScrollReveal() {
-  const elements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
-  if (!elements.length) return;
-
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.1 });
-
-  elements.forEach(el => observer.observe(el));
+@media print {
+  .cursor, .cursor-ring, nav { display: none; }
+  body { background: white; color: black; cursor: auto; }
 }
-
-/* ============================================
-   4. SUNCALC — GOLDEN HOUR HESAPLAMA
-   ============================================ */
-
-/**
- * Enlem/boylam ve tarih için güneş verilerini hesaplar.
- * SunCalc kütüphanesi gerektirir: https://github.com/mourner/suncalc
- * <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
- */
-function getSunData(lat, lng, date = new Date()) {
-  if (typeof SunCalc === 'undefined') {
-    console.warn('SunCalc kütüphanesi yüklü değil.');
-    return null;
-  }
-
-  const times = SunCalc.getTimes(date, lat, lng);
-  const sunPos = SunCalc.getPosition(date, lat, lng);
-
-  return {
-    sunrise:          formatTime(times.sunrise),
-    sunset:           formatTime(times.sunset),
-    goldenHourMorningStart: formatTime(times.goldenHour),
-    goldenHourMorningEnd:   formatTime(times.goldenHourEnd),
-    goldenHourEveningStart: formatTime(times.sunsetStart),
-    goldenHourEveningEnd:   formatTime(times.sunset),
-    solarNoon:        formatTime(times.solarNoon),
-    azimuth:          Math.round(sunPos.azimuth * (180 / Math.PI) + 180) + '°',
-    altitude:         Math.round(sunPos.altitude * (180 / Math.PI)) + '°',
-    rawTimes:         times,
-  };
-}
-
-function formatTime(date) {
-  if (!date || isNaN(date)) return '--:--';
-  return date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', hour12: false });
-}
-
-/**
- * Verilen koordinatlar için güneş veri kartını günceller.
- */
-function updateSunCard(lat, lng, containerId) {
-  const data = getSunData(lat, lng);
-  const container = document.getElementById(containerId);
-  if (!data || !container) return;
-
-  container.innerHTML = `
-    <div class="sun-data-grid">
-      <div class="sun-item">
-        <span class="sun-key">Gün Doğumu</span>
-        <span class="sun-val">${data.sunrise}</span>
-      </div>
-      <div class="sun-item">
-        <span class="sun-key">Gün Batımı</span>
-        <span class="sun-val">${data.sunset}</span>
-      </div>
-      <div class="sun-item gold">
-        <span class="sun-key">🌅 Sabah Altın Saat</span>
-        <span class="sun-val">${data.goldenHourMorningStart} – ${data.goldenHourMorningEnd}</span>
-      </div>
-      <div class="sun-item gold">
-        <span class="sun-key">🌇 Akşam Altın Saat</span>
-        <span class="sun-val">${data.goldenHourEveningStart} – ${data.goldenHourEveningEnd}</span>
-      </div>
-      <div class="sun-item">
-        <span class="sun-key">Öğlen</span>
-        <span class="sun-val">${data.solarNoon}</span>
-      </div>
-      <div class="sun-item">
-        <span class="sun-key">Güneş Açısı</span>
-        <span class="sun-val">${data.altitude}</span>
-      </div>
-    </div>
-  `;
-}
-
-/* ============================================
-   5. MAPBOX HARİTA
-   ============================================ */
-
-let map = null;
-let markers = [];
-let locations = JSON.parse(localStorage.getItem('dmc_locations') || '[]');
-
-const PIN_COLORS = {
-  'Otomobil Çekimi': '#e87b3a',
-  'Portre':          '#d4a843',
-  'Altın Saat':      '#f0c060',
-  '135mm Uygun':     '#a0c4ff',
-  'Geniş Açı':       '#80d4a0',
-};
-
-/**
- * Mapbox haritayı başlatır.
- * Sayfada <div id="map"></div> olması gerekir.
- */
-function initMap() {
-  const mapContainer = document.getElementById('map');
-  if (!mapContainer) return;
-
-  if (MAPBOX_TOKEN === 'pk.eyJ1IjoiY2V0aW5idWdyYWEiLCJhIjoiY21uNXRqcnN2MGQ5YzJ0c2NqdW0zaG04ZSJ9.pkCUVwUhkrfNH-zcP1BvDA') {
-    mapContainer.innerHTML = `
-      <div style="height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;font-family:'Space Mono',monospace;font-size:11px;color:#555;background:#111;border:1px solid #2a2a2a;">
-        <span style="font-size:40px">🗺</span>
-        <span>Harita için MAPBOX_TOKEN gerekli</span>
-        <span style="font-size:9px;opacity:0.5">main.js içinde MAPBOX_TOKEN değişkenini ayarla</span>
-      </div>`;
-    return;
-  }
-
-  mapboxgl.accessToken = MAPBOX_TOKEN;
-
-  map = new mapboxgl.Map({
-    container: 'map',
-    style: 'mapbox://styles/mapbox/dark-v11',
-    center: [32.8597, 39.9334], // Ankara
-    zoom: 12,
-    cursor: 'none',
-  });
-
-  // Controls
-  map.addControl(new mapboxgl.NavigationControl({ showCompass: true }), 'top-right');
-  map.addControl(new mapboxgl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: false }), 'top-right');
-
-  map.on('load', () => {
-    loadSavedLocations();
-    map.on('click', handleMapClick);
-  });
-}
-
-function handleMapClick(e) {
-  const { lng, lat } = e.lngLat;
-  openAddLocationModal(lat, lng);
-}
-
-function openAddLocationModal(lat, lng) {
-  const name = prompt('📍 Lokasyon adı:');
-  if (!name) return;
-
-  const tagOptions = Object.keys(PIN_COLORS).join(' / ');
-  const tag  = prompt(`Etiket (${tagOptions}):`, 'Portre');
-  const lens = prompt('Lens önerisi (örn: 135mm F2):', '135mm F2');
-  const note = prompt('Not (isteğe bağlı):', '');
-
-  const location = {
-    id:   Date.now(),
-    name, tag: tag || 'Portre', lens: lens || '135mm F2',
-    note: note || '', lat, lng,
-    createdAt: new Date().toISOString(),
-  };
-
-  locations.push(location);
-  saveLocations();
-  addMarker(location);
-  showSunInfo(lat, lng, name);
-}
-
-function addMarker(loc) {
-  if (!map) return;
-
-  const color = PIN_COLORS[loc.tag] || '#d4a843';
-
-  // Custom marker element
-  const el = document.createElement('div');
-  el.style.cssText = `
-    width: 14px; height: 14px;
-    background: ${color};
-    border: 2px solid rgba(255,255,255,0.3);
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 0 12px ${color}66;
-    transition: transform 0.2s;
-  `;
-  el.addEventListener('mouseenter', () => el.style.transform = 'scale(1.5)');
-  el.addEventListener('mouseleave', () => el.style.transform = 'scale(1)');
-
-  const sunData = getSunData(loc.lat, loc.lng);
-  const goldenTime = sunData ? sunData.goldenHourEveningStart : '--:--';
-
-  const popup = new mapboxgl.Popup({ offset: 16, closeButton: true, maxWidth: '280px' })
-    .setHTML(`
-      <div style="font-family:'Space Mono',monospace;font-size:10px;color:#c8c0b4;padding:4px">
-        <div style="font-size:16px;color:#e8e0d4;margin-bottom:10px;font-family:'Cormorant Garamond',serif;font-weight:400">${loc.name}</div>
-        <div style="color:#d4a843;margin-bottom:6px;font-size:9px;letter-spacing:0.1em">${loc.tag}</div>
-        <div style="margin-bottom:4px">🔭 ${loc.lens}</div>
-        <div style="margin-bottom:4px">🌇 Altın Saat: <span style="color:#d4a843">${goldenTime}</span></div>
-        ${loc.note ? `<div style="margin-top:8px;color:#555;line-height:1.6">${loc.note}</div>` : ''}
-        <div style="margin-top:12px;font-size:8px;color:#444">${loc.lat.toFixed(5)}, ${loc.lng.toFixed(5)}</div>
-        <button onclick="deleteLocation(${loc.id})" style="margin-top:10px;font-family:'Space Mono',monospace;font-size:8px;color:#c04040;background:none;border:1px solid #3a1a1a;padding:4px 10px;cursor:pointer;letter-spacing:0.1em">SİL</button>
-      </div>
-    `);
-
-  const marker = new mapboxgl.Marker(el)
-    .setLngLat([loc.lng, loc.lat])
-    .setPopup(popup)
-    .addTo(map);
-
-  markers.push({ id: loc.id, marker });
-}
-
-function deleteLocation(id) {
-  locations = locations.filter(l => l.id !== id);
-  saveLocations();
-  const found = markers.find(m => m.id === id);
-  if (found) { found.marker.remove(); markers = markers.filter(m => m.id !== id); }
-}
-
-function loadSavedLocations() {
-  locations.forEach(loc => addMarker(loc));
-}
-
-function saveLocations() {
-  localStorage.setItem('dmc_locations', JSON.stringify(locations));
-  renderLocationList();
-}
-
-function renderLocationList() {
-  const list = document.getElementById('locationList');
-  if (!list) return;
-
-  if (!locations.length) {
-    list.innerHTML = '<p style="font-family:\'Space Mono\',monospace;font-size:10px;color:#555;padding:24px">Henüz lokasyon eklenmedi. Haritaya tıkla.</p>';
-    return;
-  }
-
-  list.innerHTML = locations.map(loc => `
-    <div class="location-list-item" style="padding:16px 24px;border-bottom:1px solid #2a2a2a;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:background 0.2s" onmouseover="this.style.background='#1f1f1f'" onmouseout="this.style.background='transparent'" onclick="flyToLocation(${loc.lat},${loc.lng})">
-      <div>
-        <div style="font-size:17px;color:#e8e0d4;font-family:'Cormorant Garamond',serif">${loc.name}</div>
-        <div style="font-family:'Space Mono',monospace;font-size:9px;color:#d4a843;letter-spacing:0.1em;margin-top:4px">${loc.tag} · ${loc.lens}</div>
-      </div>
-      <span style="font-size:16px;color:#2a2a2a">→</span>
-    </div>
-  `).join('');
-}
-
-function flyToLocation(lat, lng) {
-  if (!map) return;
-  map.flyTo({ center: [lng, lat], zoom: 15, speed: 1.4 });
-}
-
-/* ============================================
-   6. HAVA DURUMU
-   ============================================ */
-async function getWeather(lat, lng) {
-  if (WEATHER_API_KEY === 'YOUR_OPENWEATHERMAP_KEY_HERE') return null;
-
-  try {
-    const res = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${WEATHER_API_KEY}&units=metric&lang=tr`
-    );
-    const data = await res.json();
-    return {
-      temp:        Math.round(data.main.temp) + '°C',
-      feels:       Math.round(data.main.feels_like) + '°C',
-      description: data.weather[0].description,
-      clouds:      data.clouds.all + '%',
-      wind:        data.wind.speed + ' m/s',
-      icon:        `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`,
-      shootable:   data.clouds.all < 50 ? '✓ Çekim uygun' : '⚠ Bulutlu',
-    };
-  } catch (err) {
-    console.error('Hava durumu alınamadı:', err);
-    return null;
-  }
-}
-
-async function showSunInfo(lat, lng, locationName) {
-  const sunData = getSunData(lat, lng);
-  const weather = await getWeather(lat, lng);
-
-  const infoPanel = document.getElementById('sunInfoPanel');
-  if (!infoPanel || !sunData) return;
-
-  infoPanel.style.display = 'block';
-  infoPanel.innerHTML = `
-    <div style="font-family:'Space Mono',monospace;font-size:9px;color:#d4a843;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:16px">
-      📍 ${locationName}
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-      <div>
-        <div style="font-size:8px;color:#555;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:4px">Gün Doğumu</div>
-        <div style="font-size:20px;color:#e8e0d4;font-family:'Cormorant Garamond',serif;font-style:italic">${sunData.sunrise}</div>
-      </div>
-      <div>
-        <div style="font-size:8px;color:#555;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:4px">Gün Batımı</div>
-        <div style="font-size:20px;color:#e8e0d4;font-family:'Cormorant Garamond',serif;font-style:italic">${sunData.sunset}</div>
-      </div>
-      <div>
-        <div style="font-size:8px;color:#d4a843;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:4px">🌅 Sabah Altın Saat</div>
-        <div style="font-size:16px;color:#d4a843;font-family:'Cormorant Garamond',serif;font-style:italic">${sunData.goldenHourMorningStart} – ${sunData.goldenHourMorningEnd}</div>
-      </div>
-      <div>
-        <div style="font-size:8px;color:#d4a843;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:4px">🌇 Akşam Altın Saat</div>
-        <div style="font-size:16px;color:#d4a843;font-family:'Cormorant Garamond',serif;font-style:italic">${sunData.goldenHourEveningStart} – ${sunData.goldenHourEveningEnd}</div>
-      </div>
-    </div>
-    ${weather ? `
-    <div style="border-top:1px solid #2a2a2a;padding-top:16px;font-family:'Space Mono',monospace;font-size:10px;color:#555">
-      <span style="color:${weather.clouds < '50' ? '#80d4a0' : '#e87b3a'}">${weather.shootable}</span>
-      &nbsp;·&nbsp; ${weather.temp} &nbsp;·&nbsp; Bulut: ${weather.clouds} &nbsp;·&nbsp; Rüzgar: ${weather.wind}
-    </div>` : ''}
-  `;
-}
-
-/* ============================================
-   7. KULLANICI KONUMU (GEOLOCATİON)
-   ============================================ */
-function getUserLocation() {
-  if (!navigator.geolocation) {
-    alert('Tarayıcınız konum özelliğini desteklemiyor.');
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      const { latitude: lat, longitude: lng } = pos.coords;
-      if (map) map.flyTo({ center: [lng, lat], zoom: 14, speed: 1.2 });
-      const sunData = getSunData(lat, lng);
-      if (sunData) {
-        console.log('Konumunuz için altın saat:', sunData.goldenHourEveningStart, '–', sunData.goldenHourEveningEnd);
-      }
-    },
-    err => console.warn('Konum alınamadı:', err.message)
-  );
-}
-
-/* ============================================
-   8. CONTACT FORM VALİDASYON
-   ============================================ */
-function initContactForm() {
-  const form = document.getElementById('contactForm');
-  if (!form) return;
-
-  const btn = form.querySelector('.btn-submit');
-  if (btn) {
-    btn.addEventListener('click', handleContactSubmit);
-  }
-}
-
-function handleContactSubmit() {
-  const firstName = document.getElementById('firstName')?.value.trim();
-  const email     = document.getElementById('email')?.value.trim();
-  const message   = document.getElementById('message')?.value.trim();
-  const agree     = document.getElementById('agree')?.checked;
-
-  if (!firstName || !email || !message) {
-    showFormAlert('Lütfen ad, e-posta ve mesaj alanlarını doldurun.', 'error');
-    return;
-  }
-
-  if (!isValidEmail(email)) {
-    showFormAlert('Geçerli bir e-posta adresi girin.', 'error');
-    return;
-  }
-
-  if (!agree) {
-    showFormAlert('Devam etmek için iletişim politikasını kabul etmeniz gerekiyor.', 'error');
-    return;
-  }
-
-  const successMsg = document.getElementById('successMsg');
-  if (successMsg) successMsg.classList.add('show');
-
-  const form = document.getElementById('contactForm');
-  if (form) { form.style.opacity = '0.5'; form.style.pointerEvents = 'none'; }
-}
-
-function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-function showFormAlert(message, type = 'error') {
-  let alert = document.getElementById('formAlert');
-  if (!alert) {
-    alert = document.createElement('div');
-    alert.id = 'formAlert';
-    document.getElementById('contactForm')?.appendChild(alert);
-  }
-  alert.className = `alert alert-${type}`;
-  alert.textContent = (type === 'error' ? '⚠ ' : '✓ ') + message;
-  alert.style.display = 'block';
-  setTimeout(() => { alert.style.display = 'none'; }, 4000);
-}
-
-/* ============================================
-   9. YARDIMCI FONKSİYONLAR
-   ============================================ */
-function debounce(fn, delay) {
-  let timer;
-  return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); };
-}
-
-function formatDate(date = new Date()) {
-  return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
-}
-
-function compassDirection(degrees) {
-  const dirs = ['K','KD','D','GD','G','GB','B','KB'];
-  return dirs[Math.round(degrees / 45) % 8];
-}
-
-/* ============================================
-   10. DARK / LIGHT MODE
-   ============================================ */
-function initThemeToggle() {
-  const toggleBtn = document.getElementById('themeToggle');
-  if (!toggleBtn) return;
-
-  // LocalStorage'dan kayıtlı temayı oku
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'light') {
-    document.body.classList.add('light-mode');
-  }
-
-  toggleBtn.addEventListener('click', () => {
-    document.body.classList.toggle('light-mode');
-    const isLight = document.body.classList.contains('light-mode');
-    localStorage.setItem('theme', isLight ? 'light' : 'dark');
-  });
-}
-
-/* ============================================
-   11. YUKARI ÇIK BUTONU
-   ============================================ */
-function initScrollTop() {
-  const btn = document.getElementById('scrollTopBtn');
-  if (!btn) return;
-
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 400) btn.classList.add('visible');
-    else btn.classList.remove('visible');
-  });
-
-  btn.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-
-/* ============================================
-   12. SAYFA BAZLI INIT
-   ============================================ */
-document.addEventListener('DOMContentLoaded', () => {
-  // Tüm sayfalarda çalışır
-  initCursor();
-  initNav();
-  initScrollReveal();
-  initThemeToggle();
-  initScrollTop();
-
-  // Sadece harita olan sayfada
-  if (document.getElementById('map')) {
-    initMap();
-    renderLocationList();
-  }
-
-  // Sadece iletişim sayfasında
-  if (document.getElementById('contactForm')) {
-    initContactForm();
-  }
-
-  // Sayfa yüklenince lokasyon al (isteğe bağlı)
-  // getUserLocation();
-
-  console.log('%cDış-Mekan-Çekimi', 'color:#d4a843;font-family:serif;font-size:18px;font-style:italic');
-  console.log('%cLokasyon bazlı ışık planlama platformu', 'color:#555;font-family:monospace;font-size:10px');
-});
