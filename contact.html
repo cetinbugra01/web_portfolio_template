@@ -1,0 +1,789 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <script>
+    // Tema: sayfa yüklenir yüklenmez uygula (flash önleme)
+    (function() {
+      if (localStorage.getItem('theme') === 'light') {
+        document.documentElement.classList.add('light-mode');
+        document.body && document.body.classList.add('light-mode');
+      }
+    })();
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>İletişim | Dış-Mekan-Çekimi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:  #0a0a0a;
+      --dark:   #111111;
+      --mid:    #1c1c1c;
+      --border: #2a2a2a;
+      --muted:  #555;
+      --text:   #c8c0b4;
+      --light:  #e8e0d4;
+      --gold:   #d4a843;
+      --gold2:  #f0c060;
+      --accent: #e87b3a;
+    }
+
+    html { scroll-behavior: smooth; }
+    /* ── LIGHT MODE ── */
+    html.light-mode body, body.light-mode {
+      --black:   #f5f0e8; --dark:   #ede8dc; --mid:    #e0d8cc;
+      --border:  #c8bfb0; --muted:  #8a7f70; --text:   #3a3028;
+      --light:   #1a1208; --gold:   #b8861e; --gold2:  #d4a030; --accent: #c05a18;
+    }
+    body.light-mode nav { background: linear-gradient(to bottom, rgba(245,240,232,0.97), transparent); }
+    body.light-mode .nav-links { background: rgba(245,240,232,0.98) !important; }
+    /* ── TOGGLE ── */
+    .theme-toggle { display:flex; align-items:center; gap:10px; z-index:102; cursor:pointer; background:none; border:none; padding:0; }
+    .theme-toggle-track { width:44px; height:24px; background:var(--border); border-radius:12px; position:relative; transition:background 0.3s; border:1px solid var(--muted); }
+    body.light-mode .theme-toggle-track { background:var(--gold); border-color:var(--gold); }
+    .theme-toggle-thumb { position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:50%; background:var(--gold); transition:transform 0.3s; }
+    body.light-mode .theme-toggle-thumb { transform:translateX(20px); background:var(--black); }
+    .theme-toggle-icon { font-size:14px; line-height:1; }
+    /* ── SCROLL TOP ── */
+    .scroll-top-btn { position:fixed; bottom:40px; right:40px; z-index:200; width:48px; height:48px; background:var(--gold); color:var(--black); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:20px; clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%); opacity:0; transform:translateY(20px); transition:opacity 0.4s ease, transform 0.4s ease; pointer-events:none; }
+    .scroll-top-btn.visible { opacity:1; transform:translateY(0); pointer-events:all; }
+    .scroll-top-btn:hover { background:var(--gold2); }
+
+
+    body {
+      background: var(--black);
+      color: var(--text);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      line-height: 1.7;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    .cursor {
+      width: 8px; height: 8px;
+      background: var(--gold); border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%);
+    }
+    .cursor-ring {
+      width: 36px; height: 36px;
+      border: 1px solid rgba(212,168,67,0.4); border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9998;
+      transform: translate(-50%,-50%);
+      transition: all 0.15s ease;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 24px 48px;
+      background: linear-gradient(to bottom, rgba(10,10,10,0.95), transparent);
+      backdrop-filter: blur(4px);
+    }
+    .nav-logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; letter-spacing: 0.25em;
+      color: var(--gold); text-transform: uppercase; text-decoration: none;
+    }
+    .nav-logo span { color: var(--muted); }
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    /* ── HAMBURGER ── */
+    .hamburger {
+      display: none;
+      flex-direction: column; gap: 6px;
+      cursor: pointer; z-index: 102;
+      background: none; border: none; padding: 4px;
+    }
+    .hamburger span {
+      display: block; width: 28px; height: 1px;
+      background: var(--gold); transition: all 0.3s ease-in-out;
+    }
+    .nav-links a {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--muted);
+      text-decoration: none; transition: color 0.3s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--gold); }
+
+    /* PAGE HEADER */
+    .page-header {
+      padding: 160px 64px 80px;
+      border-bottom: 1px solid var(--border);
+      position: relative; overflow: hidden;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: end;
+    }
+    .page-header::before {
+      content: 'İLETİŞİM';
+      position: absolute; right: 48px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 160px; font-weight: 300; font-style: italic;
+      color: rgba(255,255,255,0.02);
+      font-family: 'Cormorant Garamond', serif;
+      pointer-events: none; white-space: nowrap;
+    }
+    .page-tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px; letter-spacing: 0.35em;
+      text-transform: uppercase; color: var(--gold);
+      display: flex; align-items: center; gap: 16px; margin-bottom: 24px;
+    }
+    .page-tag::before {
+      content: ''; display: block; width: 40px; height: 1px; background: var(--gold);
+    }
+    .page-title {
+      font-size: clamp(48px, 6vw, 88px);
+      font-weight: 300; color: var(--light);
+      line-height: 1.05; letter-spacing: -0.02em;
+    }
+    .page-title em { font-style: italic; color: var(--gold); }
+    .page-desc {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px; color: var(--muted);
+      line-height: 1.9; align-self: end;
+      padding-bottom: 8px;
+    }
+
+    /* MAIN LAYOUT */
+    .contact-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      min-height: 70vh;
+    }
+
+    /* LEFT — INFO */
+    .contact-info {
+      background: var(--dark);
+      padding: 80px 64px;
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 64px;
+    }
+
+    .section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px; letter-spacing: 0.35em;
+      text-transform: uppercase; color: var(--gold);
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 40px;
+    }
+    .section-label::after {
+      content: ''; display: block; flex: 1;
+      height: 1px; background: var(--border); max-width: 200px;
+    }
+
+    .info-block {}
+    .info-block-title {
+      font-size: 13px;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .info-item {
+      display: flex; align-items: flex-start; gap: 20px;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .info-item:last-child { border-bottom: none; }
+    .info-icon {
+      font-size: 20px; margin-top: 2px;
+      min-width: 28px; text-align: center;
+    }
+    .info-content {}
+    .info-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px; letter-spacing: 0.2em;
+      color: var(--muted); text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .info-value {
+      font-size: 18px;
+      color: var(--light);
+    }
+    .info-value a {
+      color: var(--light); text-decoration: none;
+      transition: color 0.3s;
+    }
+    .info-value a:hover { color: var(--gold); }
+
+    /* Social links */
+    .social-links {
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .social-link {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--mid);
+      border-top: 1px solid var(--border);
+      padding: 20px 24px;
+      text-decoration: none;
+      transition: all 0.3s;
+      position: relative; overflow: hidden;
+    }
+    .social-link::before {
+      content: '';
+      position: absolute; top: 0; left: 0;
+      width: 0; height: 100%;
+      background: rgba(212,168,67,0.05);
+      transition: width 0.3s;
+    }
+    .social-link:hover::before { width: 100%; }
+    .social-link:hover { border-top-color: var(--gold); }
+    .social-name {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--muted);
+      transition: color 0.3s;
+    }
+    .social-link:hover .social-name { color: var(--gold); }
+    .social-arrow {
+      font-size: 16px; color: var(--border);
+      transition: all 0.3s;
+    }
+    .social-link:hover .social-arrow { color: var(--gold); transform: translateX(4px); }
+
+    /* RIGHT — FORM */
+    .contact-form-wrap {
+      background: var(--black);
+      padding: 80px 64px;
+    }
+
+    .form-title {
+      font-size: 36px;
+      font-weight: 300;
+      color: var(--light);
+      margin-bottom: 8px;
+    }
+    .form-title em { font-style: italic; color: var(--gold); }
+    .form-subtitle {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; color: var(--muted);
+      margin-bottom: 56px; line-height: 1.8;
+    }
+
+    .form { display: flex; flex-direction: column; gap: 0; }
+
+    .form-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
+    }
+
+    .form-group {
+      position: relative;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      background: var(--mid);
+      transition: background 0.3s;
+    }
+    .form-group:focus-within {
+      background: #1f1f1f;
+      border-color: var(--gold);
+      z-index: 1;
+    }
+    .form-group:last-of-type { border-bottom: 1px solid var(--border); }
+
+    .form-group label {
+      display: block;
+      font-family: 'Space Mono', monospace;
+      font-size: 8px; letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 20px 24px 0;
+      transition: color 0.3s;
+    }
+    .form-group:focus-within label { color: var(--gold); }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      padding: 8px 24px 20px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      color: var(--light);
+      resize: none;
+      cursor: none;
+    }
+    .form-group select {
+      appearance: none;
+      cursor: none;
+    }
+    .form-group select option {
+      background: var(--mid);
+      color: var(--light);
+    }
+    .form-group textarea {
+      min-height: 160px;
+    }
+
+    /* Checkbox group */
+    .form-check-group {
+      border: 1px solid var(--border);
+      border-top: none;
+      background: var(--mid);
+      padding: 24px;
+      display: flex; align-items: flex-start; gap: 16px;
+    }
+    .form-check-group input[type="checkbox"] {
+      appearance: none;
+      width: 18px; height: 18px; min-width: 18px;
+      border: 1px solid var(--muted);
+      background: transparent;
+      cursor: none;
+      margin-top: 3px;
+      position: relative; transition: all 0.2s;
+    }
+    .form-check-group input[type="checkbox"]:checked {
+      background: var(--gold);
+      border-color: var(--gold);
+    }
+    .form-check-group input[type="checkbox"]:checked::after {
+      content: '✓';
+      position: absolute; top: -1px; left: 3px;
+      font-size: 12px; color: var(--black);
+      font-family: 'Space Mono', monospace;
+    }
+    .form-check-group label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; color: var(--muted);
+      letter-spacing: 0.05em; line-height: 1.7;
+      cursor: none;
+    }
+
+    .form-submit {
+      margin-top: 2px;
+      display: flex; align-items: center; gap: 20px;
+    }
+    .btn-submit {
+      background: var(--gold);
+      color: var(--black);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 20px 48px;
+      border: none; cursor: none;
+      transition: all 0.3s;
+      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+      flex-shrink: 0;
+    }
+    .btn-submit:hover { background: var(--gold2); transform: translateY(-2px); }
+
+    .submit-note {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px; color: var(--muted);
+      line-height: 1.7; letter-spacing: 0.05em;
+    }
+
+    /* Success message */
+    .success-msg {
+      display: none;
+      background: rgba(212,168,67,0.08);
+      border: 1px solid rgba(212,168,67,0.3);
+      padding: 24px 32px;
+      margin-top: 16px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; color: var(--gold);
+      letter-spacing: 0.1em; line-height: 1.8;
+    }
+    .success-msg.show { display: block; }
+
+    /* FAQ */
+    .faq {
+      padding: 100px 64px;
+      background: var(--dark);
+      border-top: 1px solid var(--border);
+    }
+    .faq-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 2px; margin-top: 56px;
+    }
+    .faq-item {
+      background: var(--mid);
+      border-top: 1px solid var(--border);
+      padding: 40px;
+      transition: background 0.3s;
+      cursor: none;
+    }
+    .faq-item:hover { background: #1f1f1f; }
+    .faq-q {
+      font-size: 20px; color: var(--light);
+      font-weight: 400; margin-bottom: 16px;
+    }
+    .faq-a {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; color: var(--muted);
+      line-height: 1.9;
+    }
+
+    /* FOOTER */
+    footer {
+      padding: 64px; border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: flex-end;
+      flex-wrap: wrap; gap: 32px;
+    }
+    .footer-logo { font-size: 28px; font-weight: 300; color: var(--light); font-style: italic; }
+    .footer-links { display: flex; gap: 32px; list-style: none; }
+    .footer-links a {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--muted);
+      text-decoration: none; transition: color 0.3s;
+    }
+    .footer-links a:hover { color: var(--gold); }
+    .footer-copy { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--muted); }
+
+    /* REVEAL */
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 900px) {
+      nav { padding: 20px 24px; }
+      .hamburger { display: flex; }
+      .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+      .hamburger.open span:nth-child(2) { opacity: 0; }
+      .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+      .nav-links {
+        position: fixed; top: 0; right: -100%; width: 100%; height: 100vh;
+        background: rgba(10,10,10,0.98); backdrop-filter: blur(10px);
+        flex-direction: column; justify-content: center; align-items: center;
+        gap: 40px; transition: right 0.4s ease;
+        display: flex;
+      }
+      .nav-links.open { right: 0; }
+      .nav-links a { font-size: 14px; color: var(--muted); }
+      .page-header { grid-template-columns: 1fr; padding: 120px 24px 60px; gap: 24px; }
+      .contact-layout { grid-template-columns: 1fr; }
+      .contact-info { padding: 60px 24px; border-right: none; border-bottom: 1px solid var(--border); }
+      .contact-form-wrap { padding: 60px 24px; }
+      .form-row { grid-template-columns: 1fr; }
+      .faq { padding: 60px 24px; }
+      .faq-grid { grid-template-columns: 1fr; }
+      footer { padding: 40px 24px; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">DIS·MEKAN<span>·CEKİMİ</span></a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html#features">Özellikler</a></li>
+      <li><a href="index.html#nasil">Nasıl Çalışır</a></li>
+      <li><a href="index.html#harita">Harita</a></li>
+      <li><a href="project.html">Proje</a></li>
+      <li><a href="about.html">Hakkında</a></li>
+      <li><a href="contact.html" class="active">İletişim</a></li>
+    </ul>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <button class="theme-toggle" id="themeToggle" title="Tema değiştir">
+        <span class="theme-toggle-icon">🌙</span>
+        <div class="theme-toggle-track"><div class="theme-toggle-thumb"></div></div>
+        <span class="theme-toggle-icon">☀️</span>
+      </button>
+      <button class="hamburger" id="hamburger" aria-label="Menü">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div>
+      <div class="page-tag">Bize Ulaşın</div>
+      <h1 class="page-title">
+        Fikrin mi<br>
+        <em>Var?</em>
+      </h1>
+    </div>
+    <p class="page-desc">
+      Proje hakkında soru, öneri veya<br>
+      işbirliği teklifi için formu doldur.<br>
+      En kısa sürede geri döneceğiz.
+    </p>
+  </div>
+
+  <!-- CONTACT LAYOUT -->
+  <div class="contact-layout">
+
+    <!-- LEFT — INFO -->
+    <div class="contact-info">
+      <div>
+        <div class="section-label reveal">İletişim Bilgileri</div>
+
+        <div class="info-item reveal">
+          <div class="info-icon">✉</div>
+          <div class="info-content">
+            <div class="info-label">E-posta</div>
+            <div class="info-value">
+              proje@dismekan.com
+            </div>
+          </div>
+        </div>
+
+        <div class="info-item reveal">
+          <div class="info-icon">🏛</div>
+          <div class="info-content">
+            <div class="info-label">Kurum</div>
+            <div class="info-value">Web Projesi Yönetimi Dersi</div>
+          </div>
+        </div>
+
+        <div class="info-item reveal">
+          <div class="info-icon">📍</div>
+          <div class="info-content">
+            <div class="info-label">Konum</div>
+            <div class="info-value">Ankara, Türkiye</div>
+          </div>
+        </div>
+
+        <div class="info-item reveal">
+          <div class="info-icon">⏱</div>
+          <div class="info-content">
+            <div class="info-label">Yanıt Süresi</div>
+            <div class="info-value">24–48 saat içinde</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <div class="section-label">Bağlantılar</div>
+        <div class="social-links">
+          <a href="#" class="social-link">
+            <span class="social-name">GitHub</span>
+            <span class="social-arrow">→</span>
+          </a>
+          <a href="#" class="social-link">
+            <span class="social-name">Instagram</span>
+            <span class="social-arrow">→</span>
+          </a>
+          <a href="#" class="social-link">
+            <span class="social-name">LinkedIn</span>
+            <span class="social-arrow">→</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT — FORM -->
+    <div class="contact-form-wrap">
+      <h2 class="form-title reveal">Mesaj <em>Gönder</em></h2>
+      <p class="form-subtitle reveal">
+        Tüm alanları doldurarak bize ulaşabilirsin.<br>
+        Spam göndermeyeceğiz, söz.
+      </p>
+
+      <div class="form reveal" id="contactForm">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">Ad</label>
+            <input type="text" id="firstName" placeholder="Adın" />
+          </div>
+          <div class="form-group">
+            <label for="lastName">Soyad</label>
+            <input type="text" id="lastName" placeholder="Soyadın" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">E-posta Adresi</label>
+          <input type="email" id="email" placeholder="ornek@mail.com" />
+        </div>
+
+        <div class="form-group">
+          <label for="subject">Konu</label>
+          <select id="subject">
+            <option value="" disabled selected>Konu seçin...</option>
+            <option value="general">Genel Soru</option>
+            <option value="feature">Özellik Önerisi</option>
+            <option value="bug">Hata Bildirimi</option>
+            <option value="collab">İşbirliği Teklifi</option>
+            <option value="press">Basın & Medya</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="border-bottom: 1px solid var(--border);">
+          <label for="message">Mesajın</label>
+          <textarea id="message" placeholder="Mesajını buraya yaz..."></textarea>
+        </div>
+
+        <div class="form-check-group">
+          <input type="checkbox" id="agree" />
+          <label for="agree">
+            Gönderilen bilgilerin yalnızca bu projeyle ilgili iletişim
+            amacıyla kullanılacağını ve üçüncü taraflarla paylaşılmayacağını kabul ediyorum.
+          </label>
+        </div>
+
+        <div class="form-submit">
+          <button class="btn-submit" onclick="handleSubmit()">Gönder</button>
+          <p class="submit-note">
+            Formu göndererek<br>
+            iletişim politikamızı<br>
+            kabul etmiş olursunuz.
+          </p>
+        </div>
+
+        <div class="success-msg" id="successMsg">
+          ✓ &nbsp; Mesajın başarıyla gönderildi. En kısa sürede geri döneceğiz.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <section class="faq">
+    <div class="section-label reveal">Sık Sorulan Sorular</div>
+    <h2 style="font-size:clamp(30px,3.5vw,48px);font-weight:300;color:var(--light);margin-bottom:0" class="reveal">
+      Merak Ettiklerin
+    </h2>
+    <div class="faq-grid">
+      <div class="faq-item reveal">
+        <div class="faq-q">Platform ücretsiz mi?</div>
+        <div class="faq-a">Evet, platform bir ders projesi olarak geliştirilmiştir ve tamamen ücretsizdir. Ticari amaç taşımamaktadır.</div>
+      </div>
+      <div class="faq-item reveal" style="transition-delay:0.1s">
+        <div class="faq-q">Hangi cihazlarda çalışır?</div>
+        <div class="faq-a">Modern tarayıcı destekleyen tüm cihazlarda çalışır. Mobil uyumlu (responsive) tasarımı sayesinde telefon ve tabletlerde de sorunsuz kullanılabilir.</div>
+      </div>
+      <div class="faq-item reveal" style="transition-delay:0.15s">
+        <div class="faq-q">API anahtarı gerekiyor mu?</div>
+        <div class="faq-a">Mapbox ve SunCalc API entegrasyonu için kişisel API anahtarları gereklidir. Kurulum talimatları README dosyasında açıklanmıştır.</div>
+      </div>
+      <div class="faq-item reveal" style="transition-delay:0.2s">
+        <div class="faq-q">Verilerim güvende mi?</div>
+        <div class="faq-a">Kaydettiğin lokasyon ve notlar yalnızca kendi veritabanında saklanır. Herhangi bir üçüncü tarafla paylaşılmaz.</div>
+      </div>
+      <div class="faq-item reveal" style="transition-delay:0.25s">
+        <div class="faq-q">Projeye katkıda bulunabilir miyim?</div>
+        <div class="faq-a">GitHub üzerinden projeye ulaşarak pull request gönderebilirsin. Her türlü katkıya açığız.</div>
+      </div>
+      <div class="faq-item reveal" style="transition-delay:0.3s">
+        <div class="faq-q">Başka lensler için de öneri var mı?</div>
+        <div class="faq-a">Platform 135mm odaklı olsa da 85mm, 50mm ve 24mm gibi lensler için de ekipman önerileri ve notlar eklenebilmektedir.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div>
+      <div class="footer-logo">Dış Mekan Çekimi</div>
+      <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-top:8px">
+        Lokasyon bazlı ışık planlama platformu
+      </div>
+    </div>
+    <ul class="footer-links">
+      <li><a href="index.html">Ana Sayfa</a></li>
+      <li><a href="project.html">Proje</a></li>
+      <li><a href="about.html">Hakkında</a></li>
+      <li><a href="contact.html">İletişim</a></li>
+    </ul>
+    <div class="footer-copy">© 2025 Web Projesi Yönetimi Dersi</div>
+  </footer>
+
+  <script>
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+      setTimeout(() => {
+        ring.style.left = e.clientX + 'px';
+        ring.style.top = e.clientY + 'px';
+      }, 80);
+    });
+
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+      });
+    }, { threshold: 0.1 });
+    reveals.forEach(el => observer.observe(el));
+
+    function handleSubmit() {
+      const firstName = document.getElementById('firstName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const message = document.getElementById('message').value.trim();
+      const agree = document.getElementById('agree').checked;
+
+      if (!firstName || !email || !message) {
+        alert('Lütfen ad, e-posta ve mesaj alanlarını doldurun.');
+        return;
+      }
+      if (!agree) {
+        alert('Devam etmek için iletişim politikasını kabul etmeniz gerekiyor.');
+        return;
+      }
+
+   
+      document.getElementById('successMsg').classList.add('show');
+    }
+  </script>
+
+  <button class="scroll-top-btn" id="scrollTopBtn" title="Yukarı çık">↑</button>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Tema toggle
+      var themeBtn = document.getElementById('themeToggle');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', function() {
+          document.body.classList.toggle('light-mode');
+          document.documentElement.classList.toggle('light-mode');
+          localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+        });
+      }
+
+      // Hamburger menü
+      var ham = document.getElementById('hamburger');
+      var navL = document.getElementById('navLinks');
+      if (ham && navL) {
+        ham.addEventListener('click', function() {
+          ham.classList.toggle('open');
+          navL.classList.toggle('open');
+        });
+        navL.querySelectorAll('a').forEach(function(a) {
+          a.addEventListener('click', function() {
+            ham.classList.remove('open');
+            navL.classList.remove('open');
+          });
+        });
+      }
+      // Yukarı çık
+      var topBtn = document.getElementById('scrollTopBtn');
+      if (topBtn) {
+        window.addEventListener('scroll', function() {
+          topBtn.classList.toggle('visible', window.scrollY > 400);
+        });
+        topBtn.addEventListener('click', function() {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+      // Nav scroll efekti
+      var nav = document.querySelector('nav');
+      if (nav) {
+        window.addEventListener('scroll', function() {
+          nav.classList.toggle('scrolled', window.scrollY > 60);
+        });
+      }
+    });
+
+  </script>
+</body>
+</html>
