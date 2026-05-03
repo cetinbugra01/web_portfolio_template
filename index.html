@@ -24,6 +24,7 @@
       <li><a href="#features">Özellikler</a></li>
       <li><a href="#nasil">Nasıl Çalışır</a></li>
       <li><a href="#harita">Harita</a></li>
+      <li><a href="#lokasyonlar">Lokasyonlar</a></li>
       <li><a href="project.html">Proje</a></li>
       <li><a href="about.html">Hakkında</a></li>
       <li><a href="contact.html">İletişim</a></li>
@@ -164,6 +165,33 @@
     </div>
   </section>
 
+  <!-- ── LOKASYONLAR SECTION ── -->
+  <section class="locations-section" id="lokasyonlar">
+    <div class="section-label reveal">Çekim Lokasyonları</div>
+    <div class="locations-header reveal">
+      <h2 class="features-title">Önerilen Mekanlar &amp;<br><em>Kayıtlı Lokasyonlar</em></h2>
+      <div class="locations-controls">
+        <div class="loc-filter-group">
+          <button class="loc-filter active" data-filter="all">Tümü</button>
+          <button class="loc-filter" data-filter="Portre">Portre</button>
+          <button class="loc-filter" data-filter="Otomobil Çekimi">Otomobil</button>
+        </div>
+        <button class="favorites-toggle" id="favToggle">
+          <span class="fav-icon">♥</span>
+          <span id="favCount">0</span> Favori
+        </button>
+      </div>
+    </div>
+
+    <div class="locations-grid" id="locationsGrid">
+      <!-- JS ile doldurulacak -->
+    </div>
+
+    <div class="fav-empty" id="favEmpty" style="display:none">
+      <p>Henüz favori lokasyon eklemediniz.<br><span>Kartlardaki ♥ ikonuna tıklayın.</span></p>
+    </div>
+  </section>
+
   <div class="tech">
     <div class="tech-label">Teknolojiler</div>
     <div class="tech-items">
@@ -201,9 +229,11 @@
     var ring   = document.getElementById('cursorRing');
     if (cursor && ring) {
       var mx=0,my=0,rx=0,ry=0;
+      // Sadece mouse varsa özel cursor aktif
+      document.body.style.cursor = 'none';
       document.addEventListener('mousemove', function(e){ mx=e.clientX; my=e.clientY; cursor.style.left=mx+'px'; cursor.style.top=my+'px'; });
       (function loop(){ rx+=(mx-rx)*0.12; ry+=(my-ry)*0.12; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(loop); })();
-      document.querySelectorAll('a,button,.feature-card').forEach(function(el){
+      document.querySelectorAll('a,button,.feature-card,.loc-card,.loc-filter,.favorites-toggle,.fav-btn').forEach(function(el){
         el.addEventListener('mouseenter',function(){ ring.classList.add('hovered'); });
         el.addEventListener('mouseleave',function(){ ring.classList.remove('hovered'); });
       });
@@ -295,7 +325,161 @@
       });
     }
 
-  });
+    /* ── LOKASYONLAR — JSON okuma, kart listeleme, favori (localStorage) ── */
+    (function() {
+      var FAVS_KEY = 'dmc_favorites';
+      var showOnlyFavs = false;
+      var currentFilter = 'all';
+      var allLocations = [];
+
+      function getFavs() {
+        try { return JSON.parse(localStorage.getItem(FAVS_KEY) || '[]'); } catch(e) { return []; }
+      }
+      function saveFavs(favs) {
+        localStorage.setItem(FAVS_KEY, JSON.stringify(favs));
+      }
+      function isFav(id) { return getFavs().indexOf(id) !== -1; }
+      function toggleFav(id) {
+        var favs = getFavs();
+        var idx = favs.indexOf(id);
+        if (idx === -1) favs.push(id); else favs.splice(idx, 1);
+        saveFavs(favs);
+        return idx === -1; // true = added
+      }
+
+      function updateFavCount() {
+        var count = getFavs().length;
+        var el = document.getElementById('favCount');
+        if (el) el.textContent = count;
+        var btn = document.getElementById('favToggle');
+        if (btn) btn.classList.toggle('has-favs', count > 0);
+      }
+
+      function renderStars(n) {
+        var s = '';
+        for (var i = 1; i <= 5; i++) s += '<span class="star' + (i <= n ? ' filled' : '') + '">★</span>';
+        return s;
+      }
+
+      function createCard(loc) {
+        var fav = isFav(loc.id);
+        var div = document.createElement('div');
+        div.className = 'loc-card reveal';
+        div.dataset.category = loc.category;
+        div.dataset.id = loc.id;
+        div.innerHTML =
+          '<div class="loc-card-top">' +
+            '<div class="loc-emoji">' + loc.image + '</div>' +
+            '<button class="fav-btn' + (fav ? ' active' : '') + '" data-id="' + loc.id + '" aria-label="Favorilere ekle">♥</button>' +
+          '</div>' +
+          '<div class="loc-category">' + loc.category + '</div>' +
+          '<h3 class="loc-name">' + loc.name + '</h3>' +
+          '<p class="loc-city">📍 ' + loc.city + '</p>' +
+          '<p class="loc-desc">' + loc.description + '</p>' +
+          '<div class="loc-meta">' +
+            '<div class="loc-meta-item"><span class="loc-meta-key">Lens</span><span class="loc-meta-val">' + loc.lens + '</span></div>' +
+            '<div class="loc-meta-item"><span class="loc-meta-key">Altın Saat</span><span class="loc-meta-val">' + loc.goldenHour + '</span></div>' +
+            '<div class="loc-meta-item"><span class="loc-meta-key">Yön</span><span class="loc-meta-val">' + loc.direction + '</span></div>' +
+          '</div>' +
+          '<div class="loc-tags">' + loc.tags.map(function(t){ return '<span class="loc-tag">' + t + '</span>'; }).join('') + '</div>' +
+          '<div class="loc-stars">' + renderStars(loc.rating) + '</div>';
+        return div;
+      }
+
+      function renderCards() {
+        var grid = document.getElementById('locationsGrid');
+        var empty = document.getElementById('favEmpty');
+        if (!grid) return;
+        grid.innerHTML = '';
+        var favs = getFavs();
+        var filtered = allLocations.filter(function(loc) {
+          var catOk = currentFilter === 'all' || loc.category === currentFilter;
+          var favOk = !showOnlyFavs || favs.indexOf(loc.id) !== -1;
+          return catOk && favOk;
+        });
+        if (showOnlyFavs && filtered.length === 0) {
+          if (empty) empty.style.display = 'flex';
+        } else {
+          if (empty) empty.style.display = 'none';
+        }
+        filtered.forEach(function(loc, i) {
+          var card = createCard(loc);
+          card.style.transitionDelay = (i * 0.07) + 's';
+          grid.appendChild(card);
+          // reveal trigger
+          setTimeout(function(){ card.classList.add('visible'); }, 60 + i * 70);
+        });
+        updateFavCount();
+        // bind fav buttons
+        grid.querySelectorAll('.fav-btn').forEach(function(btn) {
+          btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var id = parseInt(btn.dataset.id);
+            var added = toggleFav(id);
+            btn.classList.toggle('active', added);
+            // toast
+            showToast(added ? '♥ Favorilere eklendi' : '♡ Favorilerden çıkarıldı');
+            updateFavCount();
+            if (showOnlyFavs) renderCards();
+          });
+        });
+      }
+
+      function showToast(msg) {
+        var t = document.getElementById('locToast');
+        if (!t) { t = document.createElement('div'); t.id = 'locToast'; t.className = 'loc-toast'; document.body.appendChild(t); }
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(t._timer);
+        t._timer = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+      }
+
+      // Filter buttons
+      document.querySelectorAll('.loc-filter').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.loc-filter').forEach(function(b){ b.classList.remove('active'); });
+          btn.classList.add('active');
+          currentFilter = btn.dataset.filter;
+          showOnlyFavs = false;
+          document.getElementById('favToggle').classList.remove('active');
+          renderCards();
+        });
+      });
+
+      var favToggle = document.getElementById('favToggle');
+      if (favToggle) {
+        favToggle.addEventListener('click', function() {
+          showOnlyFavs = !showOnlyFavs;
+          favToggle.classList.toggle('active', showOnlyFavs);
+          currentFilter = 'all';
+          document.querySelectorAll('.loc-filter').forEach(function(b){ b.classList.remove('active'); });
+          document.querySelector('.loc-filter[data-filter="all"]').classList.add('active');
+          renderCards();
+        });
+      }
+
+      // JSON fetch
+      fetch('locations.json')
+        .then(function(r){ return r.json(); })
+        .then(function(data) {
+          allLocations = data;
+          renderCards();
+        })
+        .catch(function() {
+          // Fallback: inline data if fetch fails (e.g. file:// protocol)
+          allLocations = [
+            { id:1, name:"Çankaya Bulvarı", city:"Ankara", category:"Portre", lens:"135mm F2", goldenHour:"17:50", direction:"Güney-Batı", rating:5, description:"Geniş kaldırımlar ve ağaç sıraları ile muhteşem altın saat ışığı.", tags:["Altın Saat","135mm Uygun"], image:"🏙️" },
+            { id:2, name:"Atatürk Orman Çiftliği", city:"Ankara", category:"Otomobil Çekimi", lens:"85mm F1.8", goldenHour:"18:10", direction:"Doğu", rating:4, description:"Uzun düz yollar ve çevre yeşilliği ile otomobil çekimleri için mükemmel.", tags:["Otomobil Çekimi","Geniş Alan"], image:"🚗" },
+            { id:3, name:"Anıtkabir Çevresi", city:"Ankara", category:"Portre", lens:"135mm F2", goldenHour:"07:28", direction:"Kuzey-Doğu", rating:5, description:"Tarihi mimari arka planlar ve açık alan kompozisyonları.", tags:["135mm Uygun","Tarihi"], image:"🏛️" },
+            { id:4, name:"Kugulu Park", city:"Ankara", category:"Portre", lens:"85mm F1.8", goldenHour:"17:45", direction:"Batı", rating:4, description:"Su yansımaları ve doğal bokeh için ideal.", tags:["Su Yansıması","Doğal"], image:"🦢" },
+            { id:5, name:"Gençlik Parkı", city:"Ankara", category:"Portre", lens:"50mm F1.4", goldenHour:"18:00", direction:"Güney", rating:3, description:"Kent merkezinde ulaşımı kolay lokasyon.", tags:["Kentsel","Kolay Erişim"], image:"🌳" },
+            { id:6, name:"Çankaya Köşkü Yolu", city:"Ankara", category:"Otomobil Çekimi", lens:"135mm F2", goldenHour:"07:35", direction:"Kuzey", rating:5, description:"Virajlı yollar ve çam ormanı arka planı. Aksiyon çekimleri için ideal.", tags:["Otomobil Çekimi","Orman"], image:"🛣️" }
+          ];
+          renderCards();
+        });
+    })(); // LOKASYONLAR bloğu kapandı
+
+  }); // DOMContentLoaded kapandı
   </script>
 
 </body>
