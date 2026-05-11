@@ -1,7 +1,7 @@
 # 📷 Dış-Mekan-Çekimi
 2026
 
-> Dış mekan portre ve otomobil çekimleri için **lokasyon bazlı ışık planlama platformu.**
+> Dış mekan portre ve otomobil çekimleri içi **lokasyon bazlı ışık planlama platformu.**
 
 ![Version](https://img.shields.io/badge/versiyon-1.0.0-D4A843)
 ![Status](https://img.shields.io/badge/durum-geliştiriliyor-E87B3A)
